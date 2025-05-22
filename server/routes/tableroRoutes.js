@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { postTablero, darDueno, hacerTurno } from "../controllers/tableroController";
+import { postTablero, darDueno, hacerTurno } from "../controllers/tableroController.js";
 import { validarJWT } from "../middlewares/validarJWT.js"
 export const router = Router()
 

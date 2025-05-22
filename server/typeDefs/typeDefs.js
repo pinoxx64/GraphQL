@@ -7,6 +7,11 @@ const typeDefs = gql`
         email: String
         password: String
     }
+    type Tablero {
+        id: Int
+        idUsuario: Int
+        casillas: Array
+    }
 
     type Query {
         _empty: String
@@ -15,6 +20,9 @@ const typeDefs = gql`
     type Mutation {
         register(name: String!, email: String!, password: String!): User
         login(email: String!, password: String!): User
+        postTablero(id: Int!, idUsuario: Int!): Tablero
+        darDueno(id: Int!, fila: Int!, columna: Int!): Tablero
+        hacerTurno(id: Int!): Tablero
     }
 `
 

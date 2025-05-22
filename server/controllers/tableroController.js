@@ -25,7 +25,7 @@ export const postTablero = async (req, res) => {
 }
 
 export const darDueno = async (req, res) => {
-    const idTablero = req.body
+    const idTablero = req.body.id
     const filaE = req.body.fila
     const columnaE = req.body.columna
 
@@ -57,7 +57,7 @@ export const darDueno = async (req, res) => {
 }
 
 export const hacerTurno = async (req, res) => {
-    const idTablero = req.body.idTablero
+    const idTablero = req.body.id
     const tablero = await Tablero.findOne({id: idTablero});
     if (!tablero) {
         return res.status(404).json({ message: 'Tablero no encontrado' });
