@@ -9,6 +9,7 @@ import typeDefs from '../typeDefs/typeDefs.js';
 import resolvers from '../resolvers/resolvers.js';
 import {router as userRoutes} from '../routes/userRoutes.js';
 import {router as authRoutes} from '../routes/authRoutes.js';
+import {router as tableroRoutes} from '../routes/tableroRoutes.js'
 
 
 class Server {
@@ -18,6 +19,7 @@ class Server {
         this.graphQLPath = '/graphql';
         this.usuariosPath = '/api/usuarios';
         this.authPath = '/api/auth';
+        this.tableroPath = '/api/tablero'
     
         //Middlewares
         this.middlewares();
@@ -85,6 +87,7 @@ class Server {
     routes(){
         this.app.use(this.usuariosPath , userRoutes);
         this.app.use(this.authPath , authRoutes);
+        this.app.use(this.tableroPath , tableroRoutes)
     }
 
     applyGraphQLMiddleware() {
