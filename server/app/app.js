@@ -1,6 +1,5 @@
-require('dotenv').config()
+import { Server } from './server.js';
 
-const Server = require('./server');
-const server = new Server();
-
+const server = new Server()
 server.start().catch(console.error);
+

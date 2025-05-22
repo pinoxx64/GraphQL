@@ -10,7 +10,7 @@ export const login = async (req, res = response) => {
             console.log('Usuario no encontrado');
             return res.status(400).json({ msg: 'Usuario no encontrado' });
         }
-        if (user.password !== password) {
+        if (user.password == password) {
             const token = generateJWT(user.id);
             res.status(200).json({ user, token });
         }else {
