@@ -3,6 +3,6 @@ import { postTablero, darDueno, hacerTurno } from "../controllers/tableroControl
 import { validarJWT } from "../middlewares/validarJWT.js"
 export const router = Router()
 
-router.post('/', [validarJWT], postTablero)
-router.put('/darDueno', [validarJWT], darDueno)
-router.put('/hacerTurno', [validarJWT], hacerTurno)
+router.post('/', postTablero) //, [validarJWT]
+router.put('/darDueno', darDueno) //, [validarJWT]
+router.put('/hacerTurno', hacerTurno) //, [validarJWT]

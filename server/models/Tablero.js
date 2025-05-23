@@ -2,10 +2,10 @@ import mongoose from "mongoose";
 
 const tableroSchema = new mongoose.Schema({
     id: {
-        type: Number
+        type: String
     },
     idUsuario: {
-        type: Number
+        type: String
     },
     casillas: {
         type: Array
