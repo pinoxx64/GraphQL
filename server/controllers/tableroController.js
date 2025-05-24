@@ -26,25 +26,24 @@ export const postTablero = async (req, res) => {
 
 export const darDueno = async (req, res) => {
     const idTablero = req.body.id
-    const filaE = req.body.fila
-    const columnaE = req.body.columna
+    const posicionE = req.body.posicion
 
     const tablero = await Tablero.findOne({ id: idTablero });
-    console.log(tablero.casillas[filaE][columnaE]   )
     if (!tablero) {
         return res.status(404).json({ message: 'Tablero no encontrado' });
     }
 
-    if (tablero.casillas[filaE][columnaE].propietario == 'Nadie') {
-        tablero.casillas[filaE][columnaE].propietario = 'Jugador'
+    if (tablero.casillas[posicionE].propietario == 'Nadie') {
+        tablero.casillas[posicionE].propietario = 'Jugador'
+        console.log('casilla elegida:', tablero.casillas[posicionE])
         const eleccionBot = pensamientoBot(tablero)
-        tablero.casillas[eleccionBot[0]][eleccionBot[1]].propietario = 'Bot'
+        tablero.casillas[eleccionBot].propietario = 'Bot'
         // let salir = false
         // do {
         //     Darle vueltas a complicar la inteligencia del bot a la hora de elegir casilla
         //     const fila = Math.floor(Math.random() * 3);
         //     const columna = Math.floor(Math.random() * 4);
-            
+
         //     if (tablero.casillas[fila][columna].propietario == 'Nadie') {
         //         tablero.casillas[fila][columna].propietario = 'Bot'
         //         salir = true
@@ -52,7 +51,8 @@ export const darDueno = async (req, res) => {
         //         console.log('La casilla ya tiene dueño')
         //     }
         // } while (salir == false)
-
+        tablero.markModified('casillas');
+        await tablero.save()
         return res.status(200).json({ message: 'Dueños asignado correctamente', tablero });
     } else {
         return res.status(400).json({ message: 'La casilla ya tiene dueño' });
@@ -66,51 +66,49 @@ export const hacerTurno = async (req, res) => {
         return res.status(404).json({ message: 'Tablero no encontrado' });
     }
     const dado = Math.floor(Math.random() * 6) + 1;
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 4; j++) {
-            if (tablero.casillas[i][j].numero == dado) {
-                if (tablero.casillas[i][j].cantidad < 20) {
-                    tablero.casillas[i][j].cantidad += 1;
-                }
+    for (let i = 0; i < tablero.casillas.length; i++) {
+        if (tablero.casillas[i].numero == dado) {
+            if (tablero.casillas[i].cantidad < 20) {
+                tablero.casillas[i].cantidad += 1;
             }
         }
     }
     let jugador = [false, false, false]
     let bot = [false, false, false]
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 4; j++) {
-            if (tablero.casillas[i][j].cantidad >= 20) {
-                switch (tablero.casillas[i][j].material) {
-                    case 'Trigo':
-                        if (tablero.casillas[i][j].propietario == 'Jugador') {
-                            jugador[0] = true
-                        } else {
-                            bot[0] = true
-                        }
-                        break;
+    for (let i = 0; i < tablero.casillas.length; i++) {
+        if (tablero.casillas[i].cantidad >= 20) {
+            switch (tablero.casillas[i].material) {
+                case 'Trigo':
+                    if (tablero.casillas[i].propietario == 'Jugador') {
+                        jugador[0] = true
+                    } else {
+                        bot[0] = true
+                    }
+                    break;
 
-                    case 'Madera':
-                        if (tablero.casillas[i][j].propietario == 'Jugador') {
-                            jugador[1] = true
-                        } else {
-                            bot[1] = true
-                        }
-                        break;
-                    case 'Carbón':
-                        if (tablero.casillas[i][j].propietario == 'Jugador') {
-                            jugador[2] = true
-                        } else {
-                            bot[2] = true
-                        }
-                        break;
+                case 'Madera':
+                    if (tablero.casillas[i].propietario == 'Jugador') {
+                        jugador[1] = true
+                    } else {
+                        bot[1] = true
+                    }
+                    break;
+                case 'Carbón':
+                    if (tablero.casillas[i].propietario == 'Jugador') {
+                        jugador[2] = true
+                    } else {
+                        bot[2] = true
+                    }
+                    break;
 
-                    default:
-                        break;
-                }
+                default:
+                    break;
             }
         }
     }
 
+    tablero.markModified('casillas');
+    await tablero.save();
     if (jugador[0] == true && jugador[1] == true && jugador[2] == true) {
         return res.status(200).json({ message: 'Ganaste', tablero });
     } else if (bot[0] == true && bot[1] == true && bot[2] == true) {
@@ -125,11 +123,10 @@ export const hacerTurno = async (req, res) => {
 const pensamientoBot = (tablero) => {
     let bot = [0, 0, 0]
     let eleccionBot = 'Nadie'
-    let posicionBot = []
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 4; j++) {
-            if (tablero.casillas[i][j].propietario == 'Bot') {
-                switch (tablero.casillas[i][j].material) {
+    let posicionBot = -1
+    for (let i = 0; i < tablero.casillas.length; i++) {
+            if (tablero.casillas[i].propietario == 'Bot') {
+                switch (tablero.casillas[i].material) {
                     case 'Trigo':
                         bot[0] += 1
                         break;
@@ -145,7 +142,6 @@ const pensamientoBot = (tablero) => {
                         break;
                 }
             }
-        }
     }
     if (bot[0] <= bot[1] && bot[0] <= bot[2]) {
         eleccionBot = 'Trigo'
@@ -156,14 +152,15 @@ const pensamientoBot = (tablero) => {
     } else {
         eleccionBot = 'Trigo'
     }
-    do {
-        let i = 0
-        let j = 0
-        if (tablero.casillas[i][j].material == eleccionBot && tablero.casillas[i][j].propietario == 'Nadie') {
-            posicionBot.push([i, j])
-        }
-        i++
-        j++
-    } while (posicionBot == []);
-    return posicionBot
+    console.log(eleccionBot)
+    console.log(bot)
+for (let i = 0; i < tablero.casillas.length; i++) {
+    if (
+        tablero.casillas[i].material == eleccionBot && tablero.casillas[i].propietario == 'Nadie'
+    ) {
+        posicionBot = i;
+        break; 
+    }
+}
+return posicionBot;
 }
