@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
       idUsuario: userId
     };
     sessionStorage.setItem('tableroId', tableroId);
+    console.log(body)
     const resultado = await postTablero(body);
     if (resultado && resultado.casillas) {
       mostrarTablero(resultado.casillas);
