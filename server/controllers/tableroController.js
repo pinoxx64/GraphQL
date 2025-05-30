@@ -24,41 +24,6 @@ export const postTablero = async (req, res) => {
     res.status(200).json(tablero);
 }
 
-// export const darDueno = async (req, res) => {
-//     const idTablero = req.body.id
-//     const posicionE = req.body.posicion
-
-//     const tablero = await Tablero.findOne({ id: idTablero });
-//     if (!tablero) {
-//         return res.status(404).json({ message: 'Tablero no encontrado' });
-//     }
-
-//     if (tablero.casillas[posicionE].propietario == 'Nadie') {
-//         tablero.casillas[posicionE].propietario = 'Jugador'
-//         console.log('casilla elegida:', tablero.casillas[posicionE])
-//         const eleccionBot = pensamientoBot(tablero)
-//         tablero.casillas[eleccionBot].propietario = 'Bot'
-//         // let salir = false
-//         // do {
-//         //     Darle vueltas a complicar la inteligencia del bot a la hora de elegir casilla
-//         //     const fila = Math.floor(Math.random() * 3);
-//         //     const columna = Math.floor(Math.random() * 4);
-
-//         //     if (tablero.casillas[fila][columna].propietario == 'Nadie') {
-//         //         tablero.casillas[fila][columna].propietario = 'Bot'
-//         //         salir = true
-//         //     } else {
-//         //         console.log('La casilla ya tiene dueño')
-//         //     }
-//         // } while (salir == false)
-//         tablero.markModified('casillas');
-//         await tablero.save()
-//         return res.status(200).json({ message: 'Dueños asignado correctamente', tablero });
-//     } else {
-//         return res.status(400).json({ message: 'La casilla ya tiene dueño' });
-//     }
-// }
-
 export const darDueno = async (req, res) => {
     const idTablero = req.body.id
     const posicionE = req.body.posicion
