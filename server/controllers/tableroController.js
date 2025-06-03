@@ -54,6 +54,12 @@ export const hacerTurno = async (req, res) => {
     if (!tablero) {
         return res.status(404).json({ message: 'Tablero no encontrado' });
     }
+
+    const haySinDueno = tablero.casillas.some(casilla => casilla.propietario === 'Nadie');
+    if (haySinDueno) {
+        return res.status(400).json({ message: 'Debes seleccionar todas las casillas antes de jugar el turno.', tablero });
+    }
+
     const dado = Math.floor(Math.random() * 6) + 1;
     for (let i = 0; i < tablero.casillas.length; i++) {
         if (tablero.casillas[i].numero == dado) {
@@ -110,46 +116,60 @@ export const hacerTurno = async (req, res) => {
 }
 
 const pensamientoBot = (tablero) => {
-    let bot = [0, 0, 0]
-    let eleccionBot = 'Nadie'
-    let posicionBot = -1
+    let bot = [0, 0, 0];
+    let eleccionBot = 'Nadie';
+    let posicionBot = -1;
+
     for (let i = 0; i < tablero.casillas.length; i++) {
-            if (tablero.casillas[i].propietario == 'Bot') {
-                switch (tablero.casillas[i].material) {
-                    case 'Trigo':
-                        bot[0] += 1
-                        break;
-
-                    case 'Madera':
-                        bot[1] += 1
-                        break;
-                    case 'Carbón':
-                        bot[2] += 1
-                        break;
-
-                    default:
-                        break;
-                }
+        if (tablero.casillas[i].propietario == 'Bot') {
+            switch (tablero.casillas[i].material) {
+                case 'Trigo':
+                    bot[0] += 1;
+                    break;
+                case 'Madera':
+                    bot[1] += 1;
+                    break;
+                case 'Carbón':
+                    bot[2] += 1;
+                    break;
+                default:
+                    break;
             }
+        }
     }
+
     if (bot[0] <= bot[1] && bot[0] <= bot[2]) {
-        eleccionBot = 'Trigo'
+        eleccionBot = 'Trigo';
     } else if (bot[1] < bot[0] && bot[1] <= bot[2]) {
-        eleccionBot = 'Madera'
+        eleccionBot = 'Madera';
     } else if (bot[2] < bot[1] && bot[2] < bot[0]) {
-        eleccionBot = 'Carbón'
+        eleccionBot = 'Carbón';
     } else {
-        eleccionBot = 'Trigo'
+        eleccionBot = 'Trigo';
     }
-    console.log(eleccionBot)
-    console.log(bot)
-for (let i = 0; i < tablero.casillas.length; i++) {
-    if (
-        tablero.casillas[i].material == eleccionBot && tablero.casillas[i].propietario == 'Nadie'
-    ) {
-        posicionBot = i;
-        break; 
+
+    for (let i = 0; i < tablero.casillas.length; i++) {
+        if (
+            tablero.casillas[i].material == eleccionBot &&
+            tablero.casillas[i].propietario == 'Nadie'
+        ) {
+            posicionBot = i;
+            break;
+        }
     }
-}
-return posicionBot;
+
+    if (posicionBot === -1) {
+        const libres = [];
+        for (let i = 0; i < tablero.casillas.length; i++) {
+            if (tablero.casillas[i].propietario == 'Nadie') {
+                libres.push(i);
+            }
+        }
+        if (libres.length > 0) {
+            const randomIdx = Math.floor(Math.random() * libres.length);
+            posicionBot = libres[randomIdx];
+        }
+    }
+
+    return posicionBot;
 }
