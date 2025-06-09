@@ -9,6 +9,12 @@ const tableroSchema = new mongoose.Schema({
     },
     casillas: {
         type: Array
+    },
+    almacenJugador: {
+        type: Array
+    },
+    almacenBot: {
+        type: Array
     }
 }, { collection: 'tabla', versionKey: false });
 

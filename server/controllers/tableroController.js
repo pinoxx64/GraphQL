@@ -6,7 +6,18 @@ export const postTablero = async (req, res) => {
         await Tablero.findOneAndDelete({ idUsuario: idUsuario });
     }
 
-    const materiales = ['Trigo', 'Madera', 'Carbón']
+    let almacenJugador = {
+        Trigo: 0,
+        Madera: 0,
+        Carbon: 0
+    }
+    let almacenBot = {
+        Trigo: 0,
+        Madera: 0,
+        Carbon: 0
+    }
+
+    const materiales = ['Trigo', 'Madera', 'Carbon']
     let casillas = []
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 4; j++) {
@@ -15,13 +26,12 @@ export const postTablero = async (req, res) => {
             casillas.push({
                 material: materiales[matRandom],
                 numero: numRandom,
-                cantidad: 0,
                 propietario: 'Nadie'
             })
         }
     }
-    const tablero = await Tablero.create({ id, idUsuario, casillas });
-    res.status(200).json(tablero);
+    const tablero = await Tablero.create({ id, idUsuario, casillas, almacenJugador, almacenBot });
+    res.status(200).json({ message: 'Tablero creado', tablero});
 }
 
 export const darDueno = async (req, res) => {
@@ -63,53 +73,42 @@ export const hacerTurno = async (req, res) => {
     const dado = Math.floor(Math.random() * 6) + 1;
     for (let i = 0; i < tablero.casillas.length; i++) {
         if (tablero.casillas[i].numero == dado) {
-            if (tablero.casillas[i].cantidad < 20) {
-                tablero.casillas[i].cantidad += 1;
+            const material = tablero.casillas[i].material;
+            if (tablero.casillas[i].propietario === 'Jugador') {
+                if (tablero.almacenJugador[0][material] < 20) {
+                    tablero.almacenJugador[0][material] += 1;
+                }
+            } else if (tablero.casillas[i].propietario === 'Bot') {
+                if (tablero.almacenBot[0][material] < 20) {
+                    tablero.almacenBot[0][material] += 1;
+                }
             }
         }
     }
-    let jugador = [false, false, false]
-    let bot = [false, false, false]
-    for (let i = 0; i < tablero.casillas.length; i++) {
-        if (tablero.casillas[i].cantidad >= 20) {
-            switch (tablero.casillas[i].material) {
-                case 'Trigo':
-                    if (tablero.casillas[i].propietario == 'Jugador') {
-                        jugador[0] = true
-                    } else {
-                        bot[0] = true
-                    }
-                    break;
+    console.log("almacenJugador", tablero.almacenJugador[0])
+    console.log("almacenBot", tablero.almacenBot[0])
 
-                case 'Madera':
-                    if (tablero.casillas[i].propietario == 'Jugador') {
-                        jugador[1] = true
-                    } else {
-                        bot[1] = true
-                    }
-                    break;
-                case 'Carbón':
-                    if (tablero.casillas[i].propietario == 'Jugador') {
-                        jugador[2] = true
-                    } else {
-                        bot[2] = true
-                    }
-                    break;
+    // Comprobar si alguien ha ganado (20 de cada material)
+    const jugadorGana = 
+        tablero.almacenJugador[0]['Trigo'] >= 20 &&
+        tablero.almacenJugador[0]['Madera'] >= 20 &&
+        tablero.almacenJugador[0]['Carbon'] >= 20;
 
-                default:
-                    break;
-            }
-        }
-    }
+    const botGana = 
+        tablero.almacenBot[0]['Trigo'] >= 20 &&
+        tablero.almacenBot[0]['Madera'] >= 20 &&
+        tablero.almacenBot[0]['Carbon'] >= 20;
 
-    tablero.markModified('casillas');
+    tablero.markModified('almacenJugador');
+    tablero.markModified('almacenBot');
     await tablero.save();
-    if (jugador[0] == true && jugador[1] == true && jugador[2] == true) {
-        return res.status(200).json({ message: 'Ganaste', tablero });
-    } else if (bot[0] == true && bot[1] == true && bot[2] == true) {
-        return res.status(200).json({ message: 'Perdiste', tablero });
-    } else if (jugador[0] == true && bot[0] == true && jugador[1] == true && bot[1] == true && jugador[2] == true && bot[2] == true) {
+
+    if (jugadorGana && botGana) {
         return res.status(200).json({ message: 'Empate', tablero });
+    } else if (jugadorGana) {
+        return res.status(200).json({ message: 'Ganaste', tablero });
+    } else if (botGana) {
+        return res.status(200).json({ message: 'Perdiste', tablero });
     } else {
         return res.status(200).json({ message: 'Sigue el juego', tablero });
     }
@@ -129,7 +128,7 @@ const pensamientoBot = (tablero) => {
                 case 'Madera':
                     bot[1] += 1;
                     break;
-                case 'Carbón':
+                case 'Carbon':
                     bot[2] += 1;
                     break;
                 default:
@@ -143,7 +142,7 @@ const pensamientoBot = (tablero) => {
     } else if (bot[1] < bot[0] && bot[1] <= bot[2]) {
         eleccionBot = 'Madera';
     } else if (bot[2] < bot[1] && bot[2] < bot[0]) {
-        eleccionBot = 'Carbón';
+        eleccionBot = 'Carbon';
     } else {
         eleccionBot = 'Trigo';
     }

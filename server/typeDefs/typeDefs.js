@@ -13,10 +13,17 @@ const typeDefs = gql`
         cantidad: Int
         propietario: String
     }
+    type Almacen {
+        Trigo: Int
+        Madera: Int
+        Carbon: Int
+    }
     type Tablero {
         id: String
         idUsuario: String
         casillas: [[Casilla]]
+        almacenJugador: Almacen
+        almacenBot: Almacen
     }
 
     type Query {
