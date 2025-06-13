@@ -73,11 +73,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   
   function mostrarTablero(tablero) {
-    console.log(tablero)
+  
+  let dado = tablero.dado
   let casillas = tablero.tablero.casillas;
   let almacenJugador = tablero.tablero.almacenJugador;
   let almacenBot = tablero.tablero.almacenBot;
   tableroContainer.innerHTML = '<h3>Tablero actual</h3>';
+
+  if (dado !== undefined) {
+    const dadoDiv = document.createElement('div');
+    dadoDiv.innerHTML = `<strong>Dado:</strong> ${dado}`;
+    dadoDiv.style.marginBottom = '12px';
+    tableroContainer.appendChild(dadoDiv);
+  }
+
   const tabla = document.createElement('table');
   tabla.style.borderCollapse = 'collapse';
   for (let i = 0; i < 3; i++) {

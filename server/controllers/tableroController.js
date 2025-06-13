@@ -88,7 +88,6 @@ export const hacerTurno = async (req, res) => {
     console.log("almacenJugador", tablero.almacenJugador[0])
     console.log("almacenBot", tablero.almacenBot[0])
 
-    // Comprobar si alguien ha ganado (20 de cada material)
     const jugadorGana = 
         tablero.almacenJugador[0]['Trigo'] >= 20 &&
         tablero.almacenJugador[0]['Madera'] >= 20 &&
@@ -104,13 +103,13 @@ export const hacerTurno = async (req, res) => {
     await tablero.save();
 
     if (jugadorGana && botGana) {
-        return res.status(200).json({ message: 'Empate', tablero });
+        return res.status(200).json({ message: 'Empate', tablero, dado });
     } else if (jugadorGana) {
-        return res.status(200).json({ message: 'Ganaste', tablero });
+        return res.status(200).json({ message: 'Ganaste', tablero, dado });
     } else if (botGana) {
-        return res.status(200).json({ message: 'Perdiste', tablero });
+        return res.status(200).json({ message: 'Perdiste', tablero, dado });
     } else {
-        return res.status(200).json({ message: 'Sigue el juego', tablero });
+        return res.status(200).json({ message: 'Sigue el juego', tablero, dado });
     }
 }
 
